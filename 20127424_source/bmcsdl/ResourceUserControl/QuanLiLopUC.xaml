@@ -1,0 +1,47 @@
+﻿<UserControl x:Class="bmcsdl.ResourceUserControl.QuanLiLopUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:bmcsdl.ResourceUserControl"
+             Name="ucQLLH"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <ItemsControl Name="listlophoc"
+                          ItemsSource="{Binding Path=listLop,Mode=TwoWay}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <materialDesign:Card
+  Background="{DynamicResource PrimaryHueDarkForegroundBrush}"
+  MinWidth="200"
+  Padding="8"
+  UniformCornerRadius="6">
+                        <Grid Margin="0 10 0 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock TextWrapping="Wrap" Text="{Binding malop}" Foreground="YellowGreen"/>
+                                <TextBlock TextWrapping="Wrap" Text="{Binding tenlop}"/>
+                            </StackPanel>
+                            <Button Grid.Column="1"
+                                Margin="10 0 0 0"
+  Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+  ToolTip="MaterialDesignFloatingActionMiniLightButton"
+                                Command="{Binding Path=DataContext.detail, ElementName=ucQLLH}"
+                                CommandParameter="{Binding index}">
+                                <materialDesign:PackIcon
+    Kind="DeleteForever"
+    Height="10"
+    Width="10"/>
+                            </Button>
+                        </Grid>
+                    </materialDesign:Card>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</UserControl>
