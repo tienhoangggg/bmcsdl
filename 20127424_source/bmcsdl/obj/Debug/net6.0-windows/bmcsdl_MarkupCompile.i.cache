@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET6_0;NETCOREAPP
 C:\Users\hoang\Downloads\20127424\20127424_source\bmcsdl\App.xaml
-3295044339
+4-1055057696
 
-12-1167501347
+15-1875987553
 198-757560007
-MainWindow.xaml;ResourceUserControl\loginUC.xaml;ResourceUserControl\QuanLiLopUC.xaml;
+MainWindow.xaml;ResourceUserControl\detailLopUC.xaml;ResourceUserControl\loginUC.xaml;ResourceUserControl\QuanLiLopUC.xaml;
 
-False
+True
 

@@ -8,14 +8,13 @@
              Name="ucQLLH"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <ItemsControl Name="listlophoc"
+    <ItemsControl Name="listlophoc"
                           ItemsSource="{Binding Path=listLop,Mode=TwoWay}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <materialDesign:Card
   Background="{DynamicResource PrimaryHueDarkForegroundBrush}"
-  MinWidth="200"
+  MinWidth="500"
   Padding="8"
   UniformCornerRadius="6">
                         <Grid Margin="0 10 0 0">
@@ -31,8 +30,10 @@
                                 Margin="10 0 0 0"
   Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
   ToolTip="MaterialDesignFloatingActionMiniLightButton"
-                                Command="{Binding Path=DataContext.detail, ElementName=ucQLLH}"
-                                CommandParameter="{Binding index}">
+                                Command="{Binding Path=DataContext.detail, ElementName=ucQLLH}">
+                            <Button.CommandParameter>
+                                <local:CommandParameterForBt maLop="{Binding malop}" p="{Binding ElementName=ucQLLH}"/>
+                            </Button.CommandParameter>
                                 <materialDesign:PackIcon
     Kind="DeleteForever"
     Height="10"
@@ -43,5 +44,4 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-    </Grid>
 </UserControl>

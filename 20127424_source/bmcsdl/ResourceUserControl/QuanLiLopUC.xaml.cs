@@ -23,6 +23,12 @@ namespace bmcsdl.ResourceUserControl
         public QuanLiLopUC()
         {
             InitializeComponent();
+            this.DataContext = new QuanLiLopVM();
         }
+    }
+    public class CommandParameterForBt
+    {
+        public string maLop { get; set; }
+        public UserControl p { get; set; }
     }
 }

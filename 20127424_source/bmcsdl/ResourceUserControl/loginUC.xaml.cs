@@ -21,11 +21,10 @@ namespace bmcsdl.ResourceUserControl
     /// </summary>
     public partial class loginUC : UserControl
     {
-        public loginVM login { get; set; }
         public loginUC()
         {
             InitializeComponent();
-            this.DataContext = login = new loginVM();
+            this.DataContext = new loginVM();
         }
     }
 }

@@ -6,15 +6,14 @@ using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Text.Unicode;
 using System.Windows;
+using System.Collections.ObjectModel;
 namespace bmcsdl.Model
 {
     public class dataBase
     {
         private static SqlConnection con = new SqlConnection(@"Data Source=TIENHOANGG;Initial Catalog=QLSVNhom;User ID=adminLAB3;Password=123456789;");
         private static dataBase single;
-        private static string _token;
-        private string token { get { return _token; } set { _token = value; listLop = QuanLiLopHoc(); } }
-        public List<lopHoc> listLop { get; set; }
+        private static string token { get; set; }
         private dataBase() { }
         public static dataBase get_dataBase()
         {
@@ -57,10 +56,10 @@ namespace bmcsdl.Model
                 return true;
             }
         }
-        private List<lopHoc> QuanLiLopHoc()
+        public ObservableCollection<lopHoc> QuanLiLopHoc()
         {
-            List<lopHoc> list = new List<lopHoc>();
-            SqlCommand sqlcmd = new SqlCommand("select dbo.dsLop(@token)", con);
+            ObservableCollection<lopHoc> list = new ObservableCollection<lopHoc>();
+            SqlCommand sqlcmd = new SqlCommand("exec dsLop @token", con);
             sqlcmd.Parameters.AddWithValue("@token", token);
             open();
             SqlDataReader reader = sqlcmd.ExecuteReader();
@@ -73,6 +72,29 @@ namespace bmcsdl.Model
                     lop.tenlop = reader[1].ToString();
                     lop.manv = reader[2].ToString();
                     list.Add(lop);
+                }
+            }
+            close();
+            return list;
+        }
+        public ObservableCollection<sinhvien> detailLop(string malop)
+        {
+            ObservableCollection<sinhvien> list = new ObservableCollection<sinhvien>();
+            SqlCommand sqlcmd = new SqlCommand("exec dsSinhVien @token, @MALOP", con);
+            sqlcmd.Parameters.AddWithValue("@token", token);
+            sqlcmd.Parameters.AddWithValue("@MALOP", malop);
+            open();
+            SqlDataReader reader = sqlcmd.ExecuteReader();
+            if (reader.HasRows)
+            {
+                while (reader.Read())
+                {
+                    sinhvien sv = new sinhvien();
+                    sv.masv = reader[0].ToString();
+                    sv.hoten = reader[1].ToString();
+                    sv.ngaysinh = DateTime.Parse(reader[2].ToString());
+                    sv.diachi = reader[3].ToString();
+                    list.Add(sv);
                 }
             }
             close();

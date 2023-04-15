@@ -12,16 +12,20 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Button></Button>
         </Grid>
-        <Grid Name="login" Grid.Row="1">
-            <uc:loginUC></uc:loginUC>
-        </Grid>
-        <Grid Grid.Row="2" Name="quanlilophoc" Visibility="Collapsed">
-            <uc:QuanLiLopUC></uc:QuanLiLopUC>
-        </Grid>
+        <DockPanel Grid.Row="1">
+            <Grid Name="login">
+                <uc:loginUC></uc:loginUC>
+            </Grid>
+            <Grid Name="quanlilophoc" Visibility="Collapsed">
+                <uc:QuanLiLopUC></uc:QuanLiLopUC>
+            </Grid>
+            <Grid Name="detailLop" Visibility="Collapsed">
+                <uc:detailLopUC></uc:detailLopUC>
+            </Grid>
+        </DockPanel>
     </Grid>
 </Window>

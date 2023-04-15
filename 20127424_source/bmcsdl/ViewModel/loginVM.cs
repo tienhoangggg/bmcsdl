@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Printing;
 using System.Security;
@@ -33,6 +34,12 @@ namespace bmcsdl.ViewModel
                 Grid quanli = w.FindName("quanlilophoc") as Grid;
                 login.Visibility = Visibility.Collapsed;
                 quanli.Visibility = Visibility.Visible;
+                ObservableCollection<lopHoc> temp = data.QuanLiLopHoc();
+                QuanLiLopVM.listLop.Clear();
+                for (int i = 0; i < temp.Count; i++)
+                {
+                    QuanLiLopVM.listLop.Add(temp[i]);
+                }
             }
             else
             {
