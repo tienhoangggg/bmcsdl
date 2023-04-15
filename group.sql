@@ -16,7 +16,7 @@ GO
 -- CAC CAU LENH TAO TABLE
 CREATE TABLE SINHVIEN
 (
-	MASV NVARCHAR(20),
+	MASV VARCHAR(20),
 	HOTEN NVARCHAR(100) NOT NULL,
 	NGAYSINH DATETIME,
 	DIACHI NVARCHAR(200),
@@ -147,35 +147,6 @@ SELECT MANV, HOTEN, EMAIL, CAST(CONVERT(VARCHAR(MAX), DECRYPTBYASYMKEY(ASYMKEY_I
 FROM NHANVIEN
 go
 -- d
--- tạo 2 nhân viên, 3 sinh viên
---delete from NHANVIEN
---delete from SINHVIEN
-EXEC SP_INS_PUBLIC_NHANVIEN 'NV01', N'NGUYEN VAN A', 'nva@yahoo.com', 3000000, N'NVA', '123456'
-EXEC SP_INS_PUBLIC_NHANVIEN 'NV02', N'NGUYEN VAN B', 'nvb@yahoo.com', 3000000, N'NVB', '1234567'
-INSERT into SINHVIEN
-	(MASV,HOTEN,MALOP,TENDN,MATKHAU)
-VALUES
-	(N'SV01', N'Sinh Vien A', 'LOP01', N'sva', HASHBYTES('MD5','1'));
-INSERT into SINHVIEN
-	(MASV,HOTEN,MALOP,TENDN,MATKHAU)
-VALUES
-	(N'SV02', N'Sinh Vien B', 'LOP01', N'svb', HASHBYTES('MD5','1'));
-INSERT into SINHVIEN
-	(MASV,HOTEN,MALOP,TENDN,MATKHAU)
-VALUES
-	(N'SV03', N'Sinh Vien C', 'LOP02', N'svc', HASHBYTES('MD5','1'));
--- tạo lớp học
-INSERT into LOP
-	(MALOP,TENLOP,MANV)
-VALUES
-	(N'LOP01', N'Lop 1', 'NV01');
-INSERT into LOP
-	(MALOP,TENLOP,MANV)
-VALUES
-	(N'LOP02', N'Lop 2', 'NV02');
--- tạo acc admin, đầy đủ quyền
-EXEC SP_INS_PUBLIC_NHANVIEN 'admin', N'admin', 'admin@yahoo.com', 1, N'admin', 'admin'
-go
 -- tạo acc admin cho lab 3
 USE [master]
 GO
@@ -274,11 +245,176 @@ go
 if OBJECT_ID('dsSinhVien') is not null
 	drop proc dsSinhVien
 go
-CREATE proc dsSinhVien @token varchar(MAX), @MALOP VARCHAR(20)
+CREATE proc dsSinhVien
+	@token varchar(MAX),
+	@MALOP VARCHAR(20)
 as
 BEGIN
 	declare @MaNV as NVARCHAR(20)
 	set @MaNV = dbo.checkToken(@token)
-	select MASV,HOTEN,NGAYSINH,DIACHI from SINHVIEN where MALOP in (select MALOP from LOP where MALOP = @MALOP and MANV = @MaNV)
+	select MASV, HOTEN, NGAYSINH, DIACHI
+	from SINHVIEN
+	where MALOP in (select MALOP
+	from LOP
+	where MALOP = @MALOP and (MANV = @MaNV or @MaNV = 'admin'))
 END
 go
+
+if OBJECT_ID('editSinhVien') is not null
+	drop proc editSinhVien
+go
+CREATE proc editSinhVien
+	@token varchar(MAX),
+	@MASV VARCHAR(20),
+	@HOTEN NVARCHAR(100),
+	@NGAYSINH DATE,
+	@DIACHI NVARCHAR(100)
+as
+begin
+	declare @MaNV as NVARCHAR(20)
+	set @MaNV = dbo.checkToken(@token)
+	if @MaNV = 'admin'
+		begin
+		update SINHVIEN set HOTEN = @HOTEN, NGAYSINH = @NGAYSINH, DIACHI = @DIACHI where MASV = @MASV
+	end
+		else
+		begin
+		update SINHVIEN set HOTEN = @HOTEN, NGAYSINH = @NGAYSINH, DIACHI = @DIACHI where MASV = @MASV and MALOP in (select MALOP
+			from LOP
+			where MANV = @MaNV)
+	end
+end
+go
+
+if OBJECT_ID('addBangDiem') is not null
+	drop proc addBangDiem
+go
+CREATE proc addBangDiem
+	@token varchar(MAX),
+	@MASV VARCHAR(20),
+	@MAHP VARCHAR(20),
+	@DIEM varchar(MAX)
+as
+begin
+	declare @MaNV as NVARCHAR(20)
+	set @MaNV = dbo.checkToken(@token)
+	if @MaNV = 'admin'
+		begin
+		insert into BANGDIEM(MASV,MAHP,DIEMTHI)
+		values
+			(@MASV, @MAHP, ENCRYPTBYASYMKEY(ASYMKEY_ID(@MANV), @DIEM))
+	end
+		else
+		begin
+		if exists (select *
+		from LOP
+		where MALOP in (select MALOP
+			from SINHVIEN
+			where MASV = @MASV) and MANV = @MaNV)
+			begin
+			insert into BANGDIEM(MASV,MAHP,DIEMTHI)
+			values
+				(@MASV, @MAHP, ENCRYPTBYASYMKEY(ASYMKEY_ID(@MANV), @DIEM))
+		end
+	end
+end
+go
+--dữ liệu
+-- select * from NHANVIEN
+-- select * from SINHVIEN
+-- select * from LOP
+-- select * from HOCPHAN
+-- select * from BANGDIEM
+-- delete from NHANVIEN
+-- delete from SINHVIEN
+-- delete from LOP
+-- delete from HOCPHAN
+-- delete from BANGDIEM
+EXEC SP_INS_PUBLIC_NHANVIEN 'NV01', N'NGUYEN VAN A', 'nva@yahoo.com', 3000000, N'NVA', '123456'
+EXEC SP_INS_PUBLIC_NHANVIEN 'NV02', N'NGUYEN VAN B', 'nvb@yahoo.com', 2000000, N'NVB', '1234567'
+EXEC SP_INS_PUBLIC_NHANVIEN 'admin', N'admin', 'admin@yahoo.com', 1, N'admin', 'admin'
+--
+
+ALTER TABLE LOP
+ADD
+	CONSTRAINT FK_LOP_NHANVIEN
+	FOREIGN KEY(MANV)
+	REFERENCES NHANVIEN
+GO
+
+ALTER TABLE SINHVIEN
+ADD
+	CONSTRAINT FK_SINHVIEN_LOP
+	FOREIGN KEY(MALOP)
+	REFERENCES LOP
+GO
+
+ALTER TABLE BANGDIEM
+ADD
+	CONSTRAINT FK_BANGDIEM_SINHVIEN
+	FOREIGN KEY(MASV)
+	REFERENCES SINHVIEN,
+
+	CONSTRAINT FK_BANGDIEM_HOCPHAN
+	FOREIGN KEY(MAHP)
+	REFERENCES HOCPHAN
+GO
+
+----------- INSERT TABLE
+--------------- TABLE HOCPHAN
+
+INSERT INTO HOCPHAN
+VALUES('CSC15002', N'Bảo mật cơ sở dữ liệu', 4)
+INSERT INTO HOCPHAN
+VALUES('CSC15003', N'Mã hóa ứng dụng', 4)
+INSERT INTO HOCPHAN
+VALUES('CSC15005', N'Nhập môn mã hóa mật mã', 4)
+INSERT INTO HOCPHAN
+VALUES('CSC15006', N'Nhập môn xử lý ngôn ngữ tự nhiên', 4)
+INSERT INTO HOCPHAN
+VALUES('CSC14005', N'Nhập môn học máy', 4)
+GO
+
+--------------- TABLE LOP
+INSERT INTO LOP
+VALUES('20CNTThuc', N'K20 Công Nghệ Tri Thức', 'NV01')
+INSERT INTO LOP
+VALUES('20MMT', N'K20 Mạng Máy Tính', 'NV02')
+INSERT INTO LOP
+VALUES('20KHDL', N'K20 Khoa Học Dữ Liệu', 'NA01')
+GO
+
+--------------- TABLE SINHVIEN
+INSERT INTO SINHVIEN
+VALUES('20127102', N'Hoàng Hữu Minh An', '2002-06-24', N'135B ktx Trần Hưng Đạo Quận 1',
+		'20CNTThuc', N'20127102@student.hcmus.edu.vn', HASHBYTES('MD5', '123'))
+
+INSERT INTO SINHVIEN
+VALUES('20127072', N'Lê Võ Huỳnh Thanh', '2002-06-24', N'Quận 8',
+		'20CNTThuc', N'20127072@student.hcmus.edu.vn', HASHBYTES('MD5', '123'))
+
+INSERT INTO SINHVIEN
+VALUES('20127424', N'Trần Tiến Hoàng', '2002-06-24', N'Quận 8',
+		'20CNTThuc', N'20127424@student.hcmus.edu.vn', HASHBYTES('MD5', '123'))
+
+INSERT INTO SINHVIEN
+VALUES('20127091', N'Lê Trọng Anh Tú', '2002-06-24', N'Quận 10',
+		'20CNTThuc', N'20127091@student.hcmus.edu.vn', HASHBYTES('MD5', '123'))
+
+INSERT INTO SINHVIEN
+VALUES('2012X002', N'Trọng Đạt', '2002-06-24', N'Quận 1',
+		'20MMT', N'2012X002@student.hcmus.edu.vn', HASHBYTES('MD5', '123'))
+
+INSERT INTO SINHVIEN
+VALUES('2012X004', N'Hoàng Tiến', '2002-06-24', N'Quận 3',
+		'20MMT', N'2012X004@student.hcmus.edu.vn', HASHBYTES('MD5', '123'))
+
+
+INSERT INTO SINHVIEN
+VALUES('2012X010', N'Hoàng Ainz', '2002-06-24', N'Quận 3',
+		'20KHDL', N'2012X005@student.hcmus.edu.vn', HASHBYTES('MD5', '123'))
+
+INSERT INTO SINHVIEN
+VALUES('2012X023', N'Huỳnh Võ', '2002-06-24', N'Quận 2',
+		'20KHDL', N'2012X011@student.hcmus.edu.vn', HASHBYTES('MD5', '123'))
+GO
